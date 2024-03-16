@@ -12,6 +12,9 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+
 
 public class test_transferencia_entre_conta {
 
@@ -22,7 +25,7 @@ public class test_transferencia_entre_conta {
     private String password_userDois = "senhaUser2@";
     private String conta_usuario_um;
     private String conta_usuario_dois;
-
+    
     @BeforeEach
     public void setUp() {
         System.setProperty("webdriver.chrome.driver", "drives/chromedriver.exe");
@@ -35,57 +38,62 @@ public class test_transferencia_entre_conta {
         criaConta_UserUm();
         driver.get("https://bugbank.netlify.app/");
         criaConta_UserDois();
+        driver.get("https://bugbank.netlify.app/");
         
-        Thread.sleep(1000);
-        driver.findElement(By.cssSelector(".CMabB")).click();
-        {
-            WebElement element = driver.findElement(By.cssSelector(".CMabB"));
-            Actions builder = new Actions(driver);
-            builder.moveToElement(element).perform();
-        }
-        Thread.sleep(1000);
-        {
-            WebElement element = driver.findElement(By.tagName("body"));
-            Actions builder = new Actions(driver);
-            builder.moveToElement(element, 0, 0).perform();
-        }
-        Thread.sleep(1000);
-        driver.findElement(By.id("btnCloseModal")).click();
-
         driver.findElement(By.name("email")).sendKeys(email_usuario_dois);
         driver.findElement(By.name("password")).sendKeys(password_userDois);
-        
         Thread.sleep(1000);
         driver.findElement(By.cssSelector(".otUnI")).click();
-         
+      
+        validaConta(conta_usuario_dois);
+        {
+        	 transfereSaldo(conta_usuario_um,1000);
+        	
+        }
         
         Thread.sleep(1000);
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        WebElement accountNumberElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#textAccountNumber > span")));
-        {
-        	String conta2 = conta_usuario_um;
-        	String numeroConta = getConta(conta2);
-        	String digito = getDigito(conta2);
-        	
-        	Thread.sleep(1000);
-            driver.findElement(By.id("btn-TRANSFERÊNCIA")).click();
-             
+        driver.findElement(By.name("email")).sendKeys(email_usuario_um);
+        driver.findElement(By.name("password")).sendKeys(password_userUm);
+        Thread.sleep(1000);
+        driver.findElement(By.cssSelector(".otUnI")).click();
         
-            Thread.sleep(1000);
-            driver.findElement(By.name("accountNumber")).click();
-            driver.findElement(By.name("accountNumber")).sendKeys(numeroConta);
-            driver.findElement(By.name("digit")).click();
-            driver.findElement(By.name("digit")).sendKeys(digito);
-            driver.findElement(By.name("transferValue")).click();
-            driver.findElement(By.name("transferValue")).sendKeys("1000");
-            driver.findElement(By.name("description")).click();
-            driver.findElement(By.name("description")).sendKeys("pix transferência");
-            driver.findElement(By.cssSelector(".style__ContainerButton-sc-1wsixal-0")).click();
-                         
+        validaConta(conta_usuario_um);
+        {
+        	 transfereSaldo(conta_usuario_dois,2000);
+       
         }
-      
+        
        }
-
+    
+    public void validaConta(String conta) {
+   	 driver.get("https://bugbank.netlify.app/home");
+	 driver.findElement(By.cssSelector(".home__ContainerAccountNumber-sc-1auj767-8")).click();
+	 assertThat(driver.findElement(By.cssSelector("#textAccountNumber > span")).getText(), is(conta));
+    }
+   
+    public void transfereSaldo(String contaUsada, float valor)  throws InterruptedException{
+    	 WebDriverWait wait = new WebDriverWait(driver, 10);
+         WebElement accountNumberElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#textAccountNumber > span")));
+         {
+         	String numeroConta = getConta(contaUsada);
+         	String digito = getDigito(contaUsada);
+         	
+         	Thread.sleep(1000);
+             driver.findElement(By.id("btn-TRANSFERÊNCIA")).click();
+             
+             Thread.sleep(1000);
+             driver.findElement(By.name("accountNumber")).sendKeys(numeroConta);
+             driver.findElement(By.name("digit")).sendKeys(digito);
+             driver.findElement(By.name("transferValue")).sendKeys(Float.toString(valor));
+             driver.findElement(By.name("description")).sendKeys("pix transferência");
+             driver.findElement(By.cssSelector(".style__ContainerButton-sc-1wsixal-0")).click();
+                          
+         }
+         Thread.sleep(1000);
+    	 driver.findElement(By.id("btnCloseModal")).click();
+    	 driver.findElement(By.id("btnExit")).click();
+    }
+    
     public void criaConta_UserUm()  throws InterruptedException {
         assertEquals("BugBank | O banco com bugs e falhas do seu jeito", driver.getTitle());
         Thread.sleep(1000);
@@ -153,7 +161,7 @@ public class test_transferencia_entre_conta {
 
     @AfterEach
     public void tearDown() {
-        driver.quit();
+       driver.quit();
     }
 
     private String getConta_Cadastro(String conta) {
@@ -177,7 +185,6 @@ public class test_transferencia_entre_conta {
         	 return null;
          }
     }
-    
     
     private String getDigito(String texto) {
         if (texto != null && texto.length() > 1) {
