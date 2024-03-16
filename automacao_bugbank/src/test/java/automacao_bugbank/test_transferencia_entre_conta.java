@@ -13,7 +13,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class novo_cadastro {
+public class test_transferencia_entre_conta {
 
     private WebDriver driver;
     private String email_usuario_um = "userum@gmail.com";
@@ -79,7 +79,7 @@ public class novo_cadastro {
             driver.findElement(By.name("transferValue")).click();
             driver.findElement(By.name("transferValue")).sendKeys("1000");
             driver.findElement(By.name("description")).click();
-            driver.findElement(By.name("description")).sendKeys("aaaaa");
+            driver.findElement(By.name("description")).sendKeys("pix transferência");
             driver.findElement(By.cssSelector(".style__ContainerButton-sc-1wsixal-0")).click();
                          
         }
